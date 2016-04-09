@@ -32,56 +32,56 @@ static uint8_t *framebuffer = NULL;
 
 static void setpixel(SDL_Surface *screen, int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
-    Uint32 *pixmem32;
-    Uint32 colour;  
+	Uint32 *pixmem32;
+	Uint32 colour;  
  
-    colour = SDL_MapRGB(screen->format, r, g, b);
+	colour = SDL_MapRGB(screen->format, r, g, b);
   
-    pixmem32 = (Uint32*)screen->pixels + (y * screen->w) + x;
-    *pixmem32 = colour;
+	pixmem32 = (Uint32*)screen->pixels + (y * screen->w) + x;
+	*pixmem32 = colour;
 }
 
 static int pollevent()
 {
 	SDL_Event event;
 	while(SDL_PollEvent(&event)) 
-    {      
+	{      
 		switch (event.type) 
 		{
 			case SDL_QUIT:
 				return 1;
 				break;
 		}
-    }
+	}
 
-    return 0;
+	return 0;
 }
 
 static void drawfb(SDL_Surface* screen, int fbw, int fbh, int fbbpp, int scale)
 { 
-    if(SDL_MUSTLOCK(screen)) 
-    {
-        if(SDL_LockSurface(screen) < 0)
-        	return;
-    }
+	if(SDL_MUSTLOCK(screen)) 
+	{
+		if(SDL_LockSurface(screen) < 0)
+			return;
+	}
 
-    for(int y = 0; y < fbh; y++)
-    {
-        for(int x = 0; x < fbw; x++) 
-        {
-        	// the intermediate pixels are left black to 
-        	// create an led matrix style look
-        	setpixel(screen, scale * x, scale * y,
-        			 framebuffer[(y * fbw + x) * fbbpp + 2],
-        			 framebuffer[(y * fbw + x) * fbbpp + 1],
-        			 framebuffer[(y * fbw + x) * fbbpp]);
-        }
-    }
+	for(int y = 0; y < fbh; y++)
+	{
+		for(int x = 0; x < fbw; x++) 
+		{
+			// the intermediate pixels are left black to 
+			// create an led matrix style look
+			setpixel(screen, scale * x, scale * y,
+					 framebuffer[(y * fbw + x) * fbbpp + 2],
+					 framebuffer[(y * fbw + x) * fbbpp + 1],
+					 framebuffer[(y * fbw + x) * fbbpp]);
+		}
+	}
 
-    if(SDL_MUSTLOCK(screen))
-    	SDL_UnlockSurface(screen);
+	if(SDL_MUSTLOCK(screen))
+		SDL_UnlockSurface(screen);
   
-    SDL_Flip(screen); 
+	SDL_Flip(screen); 
 }
 
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	int fd, memsize, keypress = 0, scale = 1;
 	struct fb_var_screeninfo vinfo;
 	SDL_Surface *screen;
-    
+	
 	// make sure all cmd args are present
 	if (argc < 2)
 	{
@@ -115,15 +115,15 @@ int main(int argc, char *argv[])
 	}
 
 	// inquire screen infos
-    if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
-        perror("FBIOGET_VSCREENINFO");
-        close(fd);
-        return -1;
-    }
+	if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
+		perror("FBIOGET_VSCREENINFO");
+		close(fd);
+		return -1;
+	}
 
-    // map the framebuffer pixels to userspace
-    memsize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
-    framebuffer = (unsigned char*)mmap(0, memsize, PROT_READ, MAP_SHARED, fd, 0);
+	// map the framebuffer pixels to userspace
+	memsize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+	framebuffer = (unsigned char*)mmap(0, memsize, PROT_READ, MAP_SHARED, fd, 0);
 	if (framebuffer == MAP_FAILED)
 	{
 		perror("mmap");
@@ -140,15 +140,15 @@ int main(int argc, char *argv[])
 	}
 
 	if (!(screen = SDL_SetVideoMode(scale * vinfo.xres, scale* vinfo.yres, DISPLAY_DEPTH, 0)))
-    {
-    	munmap(framebuffer, memsize);
+	{
+		munmap(framebuffer, memsize);
 		close(fd);
-        SDL_Quit();
-        return -1;
-    }
-    SDL_WM_SetCaption("fbdisp", "fbdisp");
+		SDL_Quit();
+		return -1;
+	}
+	SDL_WM_SetCaption("fbdisp", "fbdisp");
 
-    // main render looop
+	// main render looop
 	while (!keypress)
 	{
 		// draw the content of the framebuffer
