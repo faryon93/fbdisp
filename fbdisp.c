@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	}
 
 	// map the framebuffer pixels to userspace
-	memsize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+	memsize = vinfo.xres * vinfo.yres * (vinfo.bits_per_pixel / 8);
 	framebuffer = (unsigned char*)mmap(0, memsize, PROT_READ, MAP_SHARED, fd, 0);
 	if (framebuffer == MAP_FAILED)
 	{
@@ -158,7 +158,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if (!(screen = SDL_SetVideoMode(scale * vinfo.xres, scale* vinfo.yres, DISPLAY_DEPTH, 0)))
+	if (!(screen = SDL_SetVideoMode(
+		scale * vinfo.xres, scale * vinfo.yres, DISPLAY_DEPTH, 0)))
 	{
 		munmap(framebuffer, memsize);
 		close(fd);
@@ -183,4 +184,5 @@ int main(int argc, char *argv[])
 	SDL_Quit();
 	munmap(framebuffer, memsize);
 	close(fd);
+	return 0;
 }
