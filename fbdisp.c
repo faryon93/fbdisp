@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
 {
 	int fd, memsize, keypress = 0, scale = 1;
 	struct fb_var_screeninfo vinfo;
+	struct fb_fix_screeninfo finfo;
 	SDL_Surface *screen;
 	
 	// make sure all cmd args are present
@@ -139,10 +140,16 @@ int main(int argc, char *argv[])
 		close(fd);
 		return -1;
 	}
-
+	
+	// inquire fixed screen infos
+	if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo) == -1) {
+		perror("FBIOGET_VSCREENINFO");
+		close(fd);
+		return -1;
+	}
+	
 	// map the framebuffer pixels to userspace
-	memsize = vinfo.xres * vinfo.yres * (vinfo.bits_per_pixel / 8);
-	framebuffer = (unsigned char*)mmap(0, memsize, PROT_READ, MAP_SHARED, fd, 0);
+	framebuffer = (unsigned char*)mmap(0, finfo.smem_len, PROT_READ, MAP_SHARED, fd, 0);
 	if (framebuffer == MAP_FAILED)
 	{
 		perror("mmap");
